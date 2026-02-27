@@ -33,5 +33,16 @@ This application allows users to manage employee records with complete CRUD oper
 
 ---
 
-## 📂 Project Structure
+## 📂 Project Structure 
+src/main/java
+├── com.mainapp
+│ ├── controller
+│ ├── entity
+│ ├── repository
+│ ├── service
+│
+src/main/resources
+├── application.properties
+├── static
+├── templates
 

@@ -1,4 +1,4 @@
-// package com.mainapp.service;
+package com.mainapp.service;
 
 import java.util.Optional;
 
@@ -32,7 +32,22 @@ public class UserService {
 	/** Returns the user if credentials match, otherwise empty. */
 	public Optional<User> authenticate(String username, String rawPassword) {
 		return uRepo.findById(username)
-				.filter(u -> passwordEncoder.matches(rawPassword, u.getPassword()));
+				.filter(u -> {
+					if (u.getPassword() == null) {
+						return false;
+					}
+					// If already BCrypt encoded
+					if (u.getPassword().startsWith("$2a$") || u.getPassword().startsWith("$2b$") || u.getPassword().startsWith("$2y$")) {
+						return passwordEncoder.matches(rawPassword, u.getPassword());
+					}
+					// Legacy plain-text fallback with auto-migration to BCrypt
+					if (u.getPassword().equals(rawPassword)) {
+						u.setPassword(passwordEncoder.encode(rawPassword));
+						uRepo.save(u);
+						return true;
+					}
+					return false;
+				});
 	}
 
 	public Optional<User> getUser(String name) {

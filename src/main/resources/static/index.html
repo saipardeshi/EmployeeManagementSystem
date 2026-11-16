@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StaffSync - Modern Employee Management System</title>
+  <meta name="description" content="Manage your workforce seamlessly with real-time employee directory, departments, and credentials.">
+  
+  <!-- Modern Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+    <!-- Main Top Navigation -->
+    <header class="app-navbar">
+      <a href="#" class="brand" id="brandLogo">
+        <div class="brand-icon">
+          <i class="fa-solid fa-users-gear"></i>
+        </div>
+        <div class="brand-text">
+          <h1>StaffSync</h1>
+          <span>Employee Management System</span>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <!-- Theme Toggle -->
+        <button class="theme-btn" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+          <i class="fa-solid fa-sun" id="themeIcon"></i>
+        </button>
+
+        <!-- Auth Section / User Badge -->
+        <div id="authNavContainer">
+          <button class="btn btn-primary btn-sm" id="navSignInBtn">
+            <i class="fa-solid fa-right-to-bracket"></i> Sign In
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Stats Section -->
+    <section class="stats-grid" id="statsSection">
+      <div class="stat-card blue">
+        <div class="stat-info">
+          <span>Total Employees</span>
+          <h2 id="statEmployeeCount">--</h2>
+        </div>
+        <div class="stat-icon">
+          <i class="fa-solid fa-user-group"></i>
+        </div>
+      </div>
+
+      <div class="stat-card green">
+        <div class="stat-info">
+          <span>Departments</span>
+          <h2 id="statDepartmentCount">--</h2>
+        </div>
+        <div class="stat-icon">
+          <i class="fa-solid fa-building-user"></i>
+        </div>
+      </div>
+
+      <div class="stat-card amber">
+        <div class="stat-info">
+          <span>Active Projects</span>
+          <h2 id="statProjectCount">--</h2>
+        </div>
+        <div class="stat-icon">
+          <i class="fa-solid fa-diagram-project"></i>
+        </div>
+      </div>
+    </section>
+
+    <!-- Controls & Action Bar -->
+    <section class="controls-bar">
+      <div class="search-filter-group">
+        <div class="search-wrapper">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search by name, department, project...">
+        </div>
+
+        <select id="departmentFilter" class="select-filter">
+          <option value="ALL">All Departments</option>
+        </select>
+      </div>
+
+      <div class="view-controls">
+        <div class="view-btn-group">
+          <button class="view-toggle active" id="viewGridBtn" title="Grid View">
+            <i class="fa-solid fa-grip"></i>
+          </button>
+          <button class="view-toggle" id="viewTableBtn" title="Table View">
+            <i class="fa-solid fa-table-list"></i>
+          </button>
+        </div>
+
+        <button class="btn btn-primary" id="openAddModalBtn">
+          <i class="fa-solid fa-plus"></i> Add Employee
+        </button>
+      </div>
+    </section>
+
+    <!-- Employee Grid View -->
+    <main>
+      <div class="employee-grid" id="employeeGridContainer">
+        <!-- Dynamic employee cards injected here -->
+      </div>
+
+      <!-- Employee Table View (Hidden by default) -->
+      <div class="table-container" id="employeeTableContainer" style="display: none;">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Department</th>
+              <th>Project</th>
+              <th>Joined Date</th>
+              <th>Location</th>
+              <th>Contact</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="employeeTableBody">
+            <!-- Dynamic employee rows injected here -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- ==================== MODALS ==================== -->
+
+  <!-- Add Employee Modal -->
+  <div class="modal-overlay" id="addEmployeeModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-user-plus" style="color: var(--primary-400); margin-right: 8px;"></i> Add New Employee</h3>
+        <button class="icon-btn close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="addEmployeeForm" class="modal-body">
+        <div class="form-group">
+          <label>Employee Photo</label>
+          <div class="file-dropzone" id="addDropzone">
+            <img id="addPhotoPreview" class="preview-thumb" style="display: none;" alt="Preview">
+            <div id="addDropzonePrompt">
+              <i class="fa-solid fa-cloud-arrow-up" style="font-size: 24px; color: var(--primary-400); margin-bottom: 6px;"></i>
+              <p style="font-size: 0.85rem; color: var(--text-muted);">Click or drag photo here to upload</p>
+            </div>
+            <input type="file" id="addEmployeeImage" name="image" accept="image/*">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="addName">Full Name *</label>
+            <input type="text" id="addName" name="name" class="form-input" required placeholder="e.g. Rahul Sharma">
+          </div>
+          <div class="form-group">
+            <label for="addDepartment">Department *</label>
+            <input type="text" id="addDepartment" name="department" class="form-input" required placeholder="e.g. Engineering">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="addProject">Project</label>
+            <input type="text" id="addProject" name="project" class="form-input" placeholder="e.g. Cloud Migration">
+          </div>
+          <div class="form-group">
+            <label for="addDate">Joining Date</label>
+            <input type="date" id="addDate" name="date" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="addLocation">Location</label>
+            <input type="text" id="addLocation" name="location" class="form-input" placeholder="e.g. Pune, MH">
+          </div>
+          <div class="form-group">
+            <label for="addContact">Contact / Phone</label>
+            <input type="text" id="addContact" name="contact" class="form-input" placeholder="e.g. +91 9876543210">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary close-modal-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveAddEmployeeBtn">
+            <i class="fa-solid fa-check"></i> Save Employee
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Employee Modal -->
+  <div class="modal-overlay" id="editEmployeeModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-user-pen" style="color: var(--primary-400); margin-right: 8px;"></i> Edit Employee Details</h3>
+        <button class="icon-btn close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="editEmployeeForm" class="modal-body">
+        <input type="hidden" id="editEmpId">
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="editName">Full Name *</label>
+            <input type="text" id="editName" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="editDepartment">Department *</label>
+            <input type="text" id="editDepartment" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="editProject">Project</label>
+            <input type="text" id="editProject" class="form-input">
+          </div>
+          <div class="form-group">
+            <label for="editDate">Joining Date</label>
+            <input type="date" id="editDate" class="form-input">
+          </div>
+        </div>
+
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="editLocation">Location</label>
+            <input type="text" id="editLocation" class="form-input">
+          </div>
+          <div class="form-group">
+            <label for="editContact">Contact</label>
+            <input type="text" id="editContact" class="form-input">
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+          <button type="button" class="btn btn-secondary close-modal-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="saveEditEmployeeBtn">
+            <i class="fa-solid fa-floppy-disk"></i> Update Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Photo Upload Modal -->
+  <div class="modal-overlay" id="uploadPhotoModal">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-camera" style="color: var(--primary-400); margin-right: 8px;"></i> Update Photo</h3>
+        <button class="icon-btn close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <form id="uploadPhotoForm" class="modal-body">
+        <input type="hidden" id="photoEmpId">
+        <div class="form-group">
+          <div class="file-dropzone" id="photoDropzone">
+            <img id="photoModalPreview" class="preview-thumb" style="display: none;" alt="Preview">
+            <div id="photoDropzonePrompt">
+              <i class="fa-solid fa-image" style="font-size: 32px; color: var(--primary-400); margin-bottom: 8px;"></i>
+              <p style="font-size: 0.9rem; font-weight: 500;">Select or drag new image</p>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Supports PNG, JPG, JPEG</span>
+            </div>
+            <input type="file" id="modalPhotoFile" accept="image/*" required>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px;">
+          <button type="button" class="btn btn-secondary close-modal-btn">Cancel</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fa-solid fa-upload"></i> Upload Photo
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Auth Modal (Sign In / Sign Up) -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-box" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 id="authModalTitle"><i class="fa-solid fa-shield-halved" style="color: var(--primary-400); margin-right: 8px;"></i> Welcome to StaffSync</h3>
+        <button class="icon-btn close-modal-btn"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="auth-tabs">
+          <button class="auth-tab-btn active" id="tabSignIn">Sign In</button>
+          <button class="auth-tab-btn" id="tabSignUp">Create Account</button>
+        </div>
+
+        <!-- Sign In Form -->
+        <form id="signInForm">
+          <div class="form-group">
+            <label for="loginUsername">Username</label>
+            <input type="text" id="loginUsername" class="form-input" required placeholder="Enter username" value="admin">
+          </div>
+          <div class="form-group">
+            <label for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" class="form-input" required placeholder="Enter password" value="123">
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <button type="button" id="quickDemoBtn" class="btn-sm btn-secondary" style="font-size: 0.75rem; cursor: pointer;">
+              <i class="fa-solid fa-wand-magic-sparkles"></i> Demo: admin / 123
+            </button>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <i class="fa-solid fa-right-to-bracket"></i> Sign In
+          </button>
+        </form>
+
+        <!-- Sign Up Form -->
+        <form id="signUpForm" style="display: none;">
+          <div class="form-group">
+            <label for="regUsername">Username</label>
+            <input type="text" id="regUsername" class="form-input" required placeholder="Pick a username">
+          </div>
+          <div class="form-group">
+            <label for="regEmail">Email Address</label>
+            <input type="email" id="regEmail" class="form-input" required placeholder="name@company.com">
+          </div>
+          <div class="form-group">
+            <label for="regPassword">Password</label>
+            <input type="password" id="regPassword" class="form-input" required placeholder="Choose a secure password">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            <i class="fa-solid fa-user-plus"></i> Create Account
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Hub -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Custom Logic -->
+  <script src="app.js"></script>
+</body>
+</html>

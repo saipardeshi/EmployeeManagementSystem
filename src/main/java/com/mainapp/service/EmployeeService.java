@@ -155,16 +155,30 @@ public class EmployeeService {
 		});
 	}
 
-	/** Full update of every editable field. */
+	/** Full or partial update of editable fields. */
 	public Optional<Employee> updateEmployee(int id, Employee updated) {
 		return eRepo.findById(id).map(e -> {
-			e.setName(updated.getName());
-			e.setDepartment(updated.getDepartment());
-			e.setProject(updated.getProject());
-			e.setDate(updated.getDate());
-			e.setLocation(updated.getLocation());
-			e.setContact(updated.getContact());
+			if (updated.getName() != null && !updated.getName().isBlank()) e.setName(updated.getName());
+			if (updated.getDepartment() != null && !updated.getDepartment().isBlank()) e.setDepartment(updated.getDepartment());
+			if (updated.getProject() != null && !updated.getProject().isBlank()) e.setProject(updated.getProject());
+			if (updated.getDate() != null && !updated.getDate().isBlank()) e.setDate(updated.getDate());
+			if (updated.getLocation() != null && !updated.getLocation().isBlank()) e.setLocation(updated.getLocation());
+			if (updated.getContact() != null && !updated.getContact().isBlank()) e.setContact(updated.getContact());
+			if (updated.getImageName() != null && !updated.getImageName().isBlank()) e.setImageName(updated.getImageName());
 			return eRepo.save(e);
+		});
+	}
+
+	public Optional<Employee> updateEmployeePhoto(int id, MultipartFile file) {
+		return eRepo.findById(id).map(e -> {
+			if (file != null && !file.isEmpty()) {
+				String extension = getExtension(file.getOriginalFilename());
+				String imageName = "emp_" + e.getId() + "_" + System.currentTimeMillis() + extension;
+				saveFile(file, imageName);
+				e.setImageName(imageName);
+				return eRepo.save(e);
+			}
+			return e;
 		});
 	}
 

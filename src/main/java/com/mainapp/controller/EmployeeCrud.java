@@ -129,6 +129,14 @@ public class EmployeeCrud {
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
+	@PostMapping("/{id}/photo")
+	public ResponseEntity<Employee> uploadPhoto(@PathVariable int id,
+			@RequestPart("image") MultipartFile file) {
+		return eService.updateEmployeePhoto(id, file)
+				.map(ResponseEntity::ok)
+				.orElseGet(() -> ResponseEntity.notFound().build());
+	}
+
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteEmployee(@PathVariable int id) {
 		return eService.deleteEmployee(id)

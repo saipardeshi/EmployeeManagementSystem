@@ -1,4 +1,4 @@
-﻿package com.mainapp.config;
+package com.mainapp.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -38,8 +38,15 @@ public class AppConfig {
             @Override
             public void addResourceHandlers(ResourceHandlerRegistry registry) {
                 // serves saved employee photos at GET /images/<filename>
+                String uploadUri = java.nio.file.Paths.get(uploadDir).toAbsolutePath().toUri().toString();
+                if (!uploadUri.endsWith("/")) {
+                    uploadUri += "/";
+                }
                 registry.addResourceHandler("/images/**")
-                        .addResourceLocations("file:" + uploadDir + "/");
+                        .addResourceLocations(uploadUri);
+
+                registry.addResourceHandler("/**")
+                        .addResourceLocations("classpath:/static/");
             }
         };
     }

@@ -4,7 +4,7 @@
  */
 
 // Configuration & State
-const API_BASE = ''; // Relative path so it works seamlessly on Spring Boot port 8081
+const API_BASE = ''; // Relative path for Spring Boot
 let state = {
   currentUser: null,
   employees: [],
@@ -39,6 +39,7 @@ const authModal = document.getElementById('authModal');
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
   setupEventListeners();
+  setupDropzones();
   checkAuthSession();
   loadStats();
   loadEmployees();
@@ -54,20 +55,20 @@ function initTheme() {
 }
 
 function updateThemeIcon(theme) {
-  if (theme === 'light') {
-    themeIcon.className = 'fa-solid fa-moon';
-  } else {
-    themeIcon.className = 'fa-solid fa-sun';
+  if (themeIcon) {
+    themeIcon.className = theme === 'light' ? 'fa-solid fa-moon' : 'fa-solid fa-sun';
   }
 }
 
-themeToggleBtn.addEventListener('click', () => {
-  const currentTheme = document.documentElement.getAttribute('data-theme');
-  const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', newTheme);
-  localStorage.setItem('theme', newTheme);
-  updateThemeIcon(newTheme);
-});
+if (themeToggleBtn) {
+  themeToggleBtn.addEventListener('click', () => {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+    const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+  });
+}
 
 // ==========================================
 // Event Listeners
@@ -77,35 +78,45 @@ function setupEventListeners() {
   const viewGridBtn = document.getElementById('viewGridBtn');
   const viewTableBtn = document.getElementById('viewTableBtn');
 
-  viewGridBtn.addEventListener('click', () => {
-    state.currentView = 'grid';
-    viewGridBtn.classList.add('active');
-    viewTableBtn.classList.remove('active');
-    renderEmployees();
-  });
+  if (viewGridBtn && viewTableBtn) {
+    viewGridBtn.addEventListener('click', () => {
+      state.currentView = 'grid';
+      viewGridBtn.classList.add('active');
+      viewTableBtn.classList.remove('active');
+      renderEmployees();
+    });
 
-  viewTableBtn.addEventListener('click', () => {
-    state.currentView = 'table';
-    viewTableBtn.classList.add('active');
-    viewGridBtn.classList.remove('active');
-    renderEmployees();
-  });
+    viewTableBtn.addEventListener('click', () => {
+      state.currentView = 'table';
+      viewTableBtn.classList.add('active');
+      viewGridBtn.classList.remove('active');
+      renderEmployees();
+    });
+  }
 
   // Search & Filter
-  searchInput.addEventListener('input', (e) => {
-    state.searchTerm = e.target.value.trim().toLowerCase();
-    renderEmployees();
-  });
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      state.searchTerm = e.target.value.trim().toLowerCase();
+      renderEmployees();
+    });
+  }
 
-  departmentFilter.addEventListener('change', (e) => {
-    state.selectedDepartment = e.target.value;
-    renderEmployees();
-  });
+  if (departmentFilter) {
+    departmentFilter.addEventListener('change', (e) => {
+      state.selectedDepartment = e.target.value;
+      renderEmployees();
+    });
+  }
 
   // Modal Open/Close Controls
-  document.getElementById('openAddModalBtn').addEventListener('click', () => {
-    openModal(addEmployeeModal);
-  });
+  const openAddBtn = document.getElementById('openAddModalBtn');
+  if (openAddBtn) {
+    openAddBtn.addEventListener('click', () => {
+      resetAddForm();
+      openModal(addEmployeeModal);
+    });
+  }
 
   document.querySelectorAll('.close-modal-btn').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -122,48 +133,64 @@ function setupEventListeners() {
     });
   });
 
+  // Close modal with Escape key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAllModals();
+    }
+  });
+
   // Image preview in Add Modal
   const addImageInput = document.getElementById('addEmployeeImage');
   const addPhotoPreview = document.getElementById('addPhotoPreview');
   const addDropzonePrompt = document.getElementById('addDropzonePrompt');
-  addImageInput.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (re) => {
-        addPhotoPreview.src = re.target.result;
-        addPhotoPreview.style.display = 'block';
-        addDropzonePrompt.style.display = 'none';
-      };
-      reader.readAsDataURL(file);
-    }
-  });
+  if (addImageInput) {
+    addImageInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (re) => {
+          if (addPhotoPreview && addDropzonePrompt) {
+            addPhotoPreview.src = re.target.result;
+            addPhotoPreview.style.display = 'block';
+            addDropzonePrompt.style.display = 'none';
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 
   // Image preview in Photo Modal
   const modalPhotoFile = document.getElementById('modalPhotoFile');
   const photoModalPreview = document.getElementById('photoModalPreview');
   const photoDropzonePrompt = document.getElementById('photoDropzonePrompt');
-  modalPhotoFile.addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (re) => {
-        photoModalPreview.src = re.target.result;
-        photoModalPreview.style.display = 'block';
-        photoDropzonePrompt.style.display = 'none';
-      };
-      reader.readAsDataURL(file);
-    }
-  });
+  if (modalPhotoFile) {
+    modalPhotoFile.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (re) => {
+          if (photoModalPreview && photoDropzonePrompt) {
+            photoModalPreview.src = re.target.result;
+            photoModalPreview.style.display = 'block';
+            photoDropzonePrompt.style.display = 'none';
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
 
-  // Add Employee Form Submission
-  document.getElementById('addEmployeeForm').addEventListener('submit', handleAddEmployee);
+  // Form Submissions
+  const addForm = document.getElementById('addEmployeeForm');
+  if (addForm) addForm.addEventListener('submit', handleAddEmployee);
 
-  // Edit Employee Form Submission
-  document.getElementById('editEmployeeForm').addEventListener('submit', handleEditEmployee);
+  const editForm = document.getElementById('editEmployeeForm');
+  if (editForm) editForm.addEventListener('submit', handleEditEmployee);
 
-  // Upload Photo Form Submission
-  document.getElementById('uploadPhotoForm').addEventListener('submit', handleUploadPhoto);
+  const photoForm = document.getElementById('uploadPhotoForm');
+  if (photoForm) photoForm.addEventListener('submit', handleUploadPhoto);
 
   // Auth Form Tabs
   const tabSignIn = document.getElementById('tabSignIn');
@@ -171,29 +198,89 @@ function setupEventListeners() {
   const signInForm = document.getElementById('signInForm');
   const signUpForm = document.getElementById('signUpForm');
 
-  tabSignIn.addEventListener('click', () => {
-    tabSignIn.classList.add('active');
-    tabSignUp.classList.remove('active');
-    signInForm.style.display = 'block';
-    signUpForm.style.display = 'none';
-  });
+  if (tabSignIn && tabSignUp && signInForm && signUpForm) {
+    tabSignIn.addEventListener('click', () => {
+      tabSignIn.classList.add('active');
+      tabSignUp.classList.remove('active');
+      signInForm.style.display = 'block';
+      signUpForm.style.display = 'none';
+    });
 
-  tabSignUp.addEventListener('click', () => {
-    tabSignUp.classList.add('active');
-    tabSignIn.classList.remove('active');
-    signInForm.style.display = 'none';
-    signUpForm.style.display = 'block';
-  });
+    tabSignUp.addEventListener('click', () => {
+      tabSignUp.classList.add('active');
+      tabSignIn.classList.remove('active');
+      signInForm.style.display = 'none';
+      signUpForm.style.display = 'block';
+    });
 
-  // Quick Demo fill
-  document.getElementById('quickDemoBtn')?.addEventListener('click', () => {
-    document.getElementById('loginUsername').value = 'admin';
-    document.getElementById('loginPassword').value = '123';
-  });
+    signInForm.addEventListener('submit', handleSignIn);
+    signUpForm.addEventListener('submit', handleSignUp);
+  }
 
-  // Sign In / Sign Up Handlers
-  signInForm.addEventListener('submit', handleSignIn);
-  signUpForm.addEventListener('submit', handleSignUp);
+  // Quick Demo credentials button
+  const quickDemoBtn = document.getElementById('quickDemoBtn');
+  if (quickDemoBtn) {
+    quickDemoBtn.addEventListener('click', () => {
+      const u = document.getElementById('loginUsername');
+      const p = document.getElementById('loginPassword');
+      if (u) u.value = 'admin';
+      if (p) p.value = '123';
+    });
+  }
+
+  // Nav sign-in trigger
+  const navSignInBtn = document.getElementById('navSignInBtn');
+  if (navSignInBtn) {
+    navSignInBtn.addEventListener('click', () => openModal(authModal));
+  }
+}
+
+// Drag and drop helper for file inputs
+function setupDropzones() {
+  const dropzones = [
+    { zone: document.getElementById('addDropzone'), input: document.getElementById('addEmployeeImage') },
+    { zone: document.getElementById('photoDropzone'), input: document.getElementById('modalPhotoFile') }
+  ];
+
+  dropzones.forEach(({ zone, input }) => {
+    if (!zone || !input) return;
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      zone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.add('drag-active');
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      zone.addEventListener(eventName, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        zone.classList.remove('drag-active');
+      });
+    });
+
+    zone.addEventListener('drop', (e) => {
+      const files = e.dataTransfer.files;
+      if (files && files.length > 0) {
+        input.files = files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+  });
+}
+
+function resetAddForm() {
+  const form = document.getElementById('addEmployeeForm');
+  if (form) form.reset();
+  const preview = document.getElementById('addPhotoPreview');
+  const prompt = document.getElementById('addDropzonePrompt');
+  if (preview) {
+    preview.src = '';
+    preview.style.display = 'none';
+  }
+  if (prompt) prompt.style.display = 'block';
 }
 
 // ==========================================
@@ -204,9 +291,9 @@ async function loadStats() {
     const res = await fetch(`${API_BASE}/api/employees/stats`);
     if (res.ok) {
       const stats = await res.json();
-      statEmployeeCount.textContent = stats.employeeCount || 0;
-      statDepartmentCount.textContent = stats.departmentCount || 0;
-      statProjectCount.textContent = stats.projectCount || 0;
+      if (statEmployeeCount) statEmployeeCount.textContent = stats.employeeCount || 0;
+      if (statDepartmentCount) statDepartmentCount.textContent = stats.departmentCount || 0;
+      if (statProjectCount) statProjectCount.textContent = stats.projectCount || 0;
     }
   } catch (err) {
     console.error('Failed to load stats:', err);
@@ -230,6 +317,8 @@ async function loadEmployees() {
 }
 
 function updateDepartmentFilterOptions() {
+  if (!departmentFilter) return;
+
   state.departments = new Set();
   state.employees.forEach(e => {
     if (e.department && e.department.trim()) {
@@ -237,15 +326,19 @@ function updateDepartmentFilterOptions() {
     }
   });
 
-  const currentVal = departmentFilter.value;
+  const currentVal = departmentFilter.value || 'ALL';
   departmentFilter.innerHTML = '<option value="ALL">All Departments</option>';
-  state.departments.forEach(dept => {
+
+  const sortedDepts = Array.from(state.departments).sort();
+  sortedDepts.forEach(dept => {
     const opt = document.createElement('option');
     opt.value = dept;
     opt.textContent = dept;
     departmentFilter.appendChild(opt);
   });
-  departmentFilter.value = currentVal || 'ALL';
+
+  departmentFilter.value = state.departments.has(currentVal) ? currentVal : 'ALL';
+  state.selectedDepartment = departmentFilter.value;
 }
 
 // ==========================================
@@ -253,31 +346,45 @@ function updateDepartmentFilterOptions() {
 // ==========================================
 function renderEmployees() {
   const filtered = state.employees.filter(emp => {
-    const matchDept = state.selectedDepartment === 'ALL' || 
-                      (emp.department && emp.department.toLowerCase() === state.selectedDepartment.toLowerCase());
-    
+    const matchDept = state.selectedDepartment === 'ALL' ||
+      (emp.department && emp.department.trim().toLowerCase() === state.selectedDepartment.trim().toLowerCase());
+
     const query = state.searchTerm;
-    const matchSearch = !query || 
+    const matchSearch = !query ||
       (emp.name && emp.name.toLowerCase().includes(query)) ||
       (emp.department && emp.department.toLowerCase().includes(query)) ||
       (emp.project && emp.project.toLowerCase().includes(query)) ||
-      (emp.location && emp.location.toLowerCase().includes(query));
+      (emp.location && emp.location.toLowerCase().includes(query)) ||
+      (emp.contact && emp.contact.toLowerCase().includes(query));
 
     return matchDept && matchSearch;
   });
 
   if (state.currentView === 'grid') {
-    employeeGridContainer.style.display = 'grid';
-    employeeTableContainer.style.display = 'none';
+    if (employeeGridContainer) employeeGridContainer.style.display = 'grid';
+    if (employeeTableContainer) employeeTableContainer.style.display = 'none';
     renderGridView(filtered);
   } else {
-    employeeGridContainer.style.display = 'none';
-    employeeTableContainer.style.display = 'block';
+    if (employeeGridContainer) employeeGridContainer.style.display = 'none';
+    if (employeeTableContainer) employeeTableContainer.style.display = 'block';
     renderTableView(filtered);
   }
 }
 
+// Safe avatar error handler
+window.handleAvatarError = function(img, initials) {
+  img.onerror = null;
+  const placeholder = document.createElement('div');
+  placeholder.className = img.classList.contains('table-avatar')
+    ? 'avatar-placeholder table-avatar-placeholder'
+    : 'avatar-placeholder';
+  placeholder.textContent = initials;
+  img.replaceWith(placeholder);
+};
+
 function renderGridView(list) {
+  if (!employeeGridContainer) return;
+
   if (list.length === 0) {
     employeeGridContainer.innerHTML = `
       <div class="empty-state">
@@ -291,8 +398,8 @@ function renderGridView(list) {
   }
 
   employeeGridContainer.innerHTML = list.map(emp => {
-    const initials = getInitials(emp.name);
-    const photoSrc = emp.imageName ? `/images/${emp.imageName}` : '';
+    const initials = escapeHtml(getInitials(emp.name));
+    const photoSrc = emp.imageName ? `/images/${encodeURIComponent(emp.imageName)}` : '';
     const formattedDate = emp.date ? emp.date.replace('T', ' ') : 'N/A';
 
     return `
@@ -301,7 +408,7 @@ function renderGridView(list) {
         <div class="card-header-inner">
           <div class="avatar-wrapper">
             ${emp.imageName ? `
-              <img src="${photoSrc}" alt="${emp.name}" class="employee-avatar" onerror="this.outerHTML='<div class=\\'avatar-placeholder\\'>${initials}</div>'">
+              <img src="${photoSrc}" alt="${escapeHtml(emp.name || '')}" class="employee-avatar" onerror="handleAvatarError(this, '${initials}')">
             ` : `
               <div class="avatar-placeholder">${initials}</div>
             `}
@@ -344,7 +451,7 @@ function renderGridView(list) {
           <button class="btn btn-secondary btn-sm" onclick="openEditModal(${emp.id})">
             <i class="fa-solid fa-pen-to-square"></i> Edit
           </button>
-          <button class="btn btn-danger btn-sm" onclick="confirmDeleteEmployee(${emp.id}, '${escapeHtml(emp.name)}')">
+          <button class="btn btn-danger btn-sm" title="Delete Employee" onclick="confirmDeleteEmployee(${emp.id})">
             <i class="fa-solid fa-trash"></i>
           </button>
         </div>
@@ -354,6 +461,8 @@ function renderGridView(list) {
 }
 
 function renderTableView(list) {
+  if (!employeeTableBody) return;
+
   if (list.length === 0) {
     employeeTableBody.innerHTML = `
       <tr>
@@ -366,8 +475,8 @@ function renderTableView(list) {
   }
 
   employeeTableBody.innerHTML = list.map(emp => {
-    const initials = getInitials(emp.name);
-    const photoSrc = emp.imageName ? `/images/${emp.imageName}` : '';
+    const initials = escapeHtml(getInitials(emp.name));
+    const photoSrc = emp.imageName ? `/images/${encodeURIComponent(emp.imageName)}` : '';
     const formattedDate = emp.date ? emp.date.replace('T', ' ') : 'N/A';
 
     return `
@@ -375,12 +484,12 @@ function renderTableView(list) {
         <td>
           <div class="table-user-cell">
             ${emp.imageName ? `
-              <img src="${photoSrc}" class="table-avatar" alt="${emp.name}" onerror="this.outerHTML='<div class=\\'avatar-placeholder\\' style=\\'width:40px;height:40px;font-size:14px;\\'>${initials}</div>'">
+              <img src="${photoSrc}" class="table-avatar" alt="${escapeHtml(emp.name || '')}" onerror="handleAvatarError(this, '${initials}')">
             ` : `
-              <div class="avatar-placeholder" style="width:40px;height:40px;font-size:14px;">${initials}</div>
+              <div class="avatar-placeholder table-avatar-placeholder">${initials}</div>
             `}
             <div>
-              <strong style="color: var(--text-main); display: block;">${escapeHtml(emp.name)}</strong>
+              <strong style="color: var(--text-main); display: block;">${escapeHtml(emp.name || 'Unnamed')}</strong>
               <small style="color: var(--text-dim);">ID #${emp.id}</small>
             </div>
           </div>
@@ -395,10 +504,10 @@ function renderTableView(list) {
             <button class="icon-btn" style="width:32px;height:32px;font-size:12px;" title="Update Photo" onclick="openPhotoModal(${emp.id})">
               <i class="fa-solid fa-camera"></i>
             </button>
-            <button class="btn btn-secondary btn-sm" onclick="openEditModal(${emp.id})">
+            <button class="btn btn-secondary btn-sm" title="Edit Employee" onclick="openEditModal(${emp.id})">
               <i class="fa-solid fa-pen"></i>
             </button>
-            <button class="btn btn-danger btn-sm" onclick="confirmDeleteEmployee(${emp.id}, '${escapeHtml(emp.name)}')">
+            <button class="btn btn-danger btn-sm" title="Delete Employee" onclick="confirmDeleteEmployee(${emp.id})">
               <i class="fa-solid fa-trash"></i>
             </button>
           </div>
@@ -408,13 +517,13 @@ function renderTableView(list) {
   }).join('');
 }
 
-function resetFilters() {
-  searchInput.value = '';
-  departmentFilter.value = 'ALL';
+window.resetFilters = function() {
+  if (searchInput) searchInput.value = '';
+  if (departmentFilter) departmentFilter.value = 'ALL';
   state.searchTerm = '';
   state.selectedDepartment = 'ALL';
   renderEmployees();
-}
+};
 
 // ==========================================
 // CRUD Operations
@@ -423,8 +532,10 @@ async function handleAddEmployee(e) {
   e.preventDefault();
   const form = e.target;
   const submitBtn = document.getElementById('saveAddEmployeeBtn');
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+  }
 
   try {
     const formData = new FormData(form);
@@ -435,21 +546,22 @@ async function handleAddEmployee(e) {
 
     if (res.ok) {
       showToast('Employee created successfully!', 'success');
-      form.reset();
-      document.getElementById('addPhotoPreview').style.display = 'none';
-      document.getElementById('addDropzonePrompt').style.display = 'block';
+      resetAddForm();
       closeAllModals();
       await loadEmployees();
       await loadStats();
     } else {
-      showToast('Failed to add employee', 'error');
+      const err = await res.json().catch(() => ({}));
+      showToast(err.message || 'Failed to add employee', 'error');
     }
   } catch (err) {
     console.error('Error adding employee:', err);
     showToast('Network error while adding employee', 'error');
   } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Save Employee';
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Save Employee';
+    }
   }
 }
 
@@ -457,31 +569,44 @@ window.openEditModal = function(id) {
   const emp = state.employees.find(e => e.id === id);
   if (!emp) return;
 
-  document.getElementById('editEmpId').value = emp.id;
-  document.getElementById('editName').value = emp.name || '';
-  document.getElementById('editDepartment').value = emp.department || '';
-  document.getElementById('editProject').value = emp.project || '';
-  document.getElementById('editDate').value = emp.date ? emp.date.split('T')[0] : '';
-  document.getElementById('editLocation').value = emp.location || '';
-  document.getElementById('editContact').value = emp.contact || '';
+  const idInput = document.getElementById('editEmpId');
+  const nameInput = document.getElementById('editName');
+  const deptInput = document.getElementById('editDepartment');
+  const projInput = document.getElementById('editProject');
+  const dateInput = document.getElementById('editDate');
+  const locInput = document.getElementById('editLocation');
+  const contactInput = document.getElementById('editContact');
+
+  if (idInput) idInput.value = emp.id;
+  if (nameInput) nameInput.value = emp.name || '';
+  if (deptInput) deptInput.value = emp.department || '';
+  if (projInput) projInput.value = emp.project || '';
+  if (dateInput) dateInput.value = emp.date ? emp.date.split('T')[0] : '';
+  if (locInput) locInput.value = emp.location || '';
+  if (contactInput) contactInput.value = emp.contact || '';
 
   openModal(editEmployeeModal);
 };
 
 async function handleEditEmployee(e) {
   e.preventDefault();
-  const id = document.getElementById('editEmpId').value;
+  const idInput = document.getElementById('editEmpId');
+  const id = idInput ? idInput.value : null;
+  if (!id) return;
+
   const submitBtn = document.getElementById('saveEditEmployeeBtn');
-  submitBtn.disabled = true;
-  submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating...';
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Updating...';
+  }
 
   const payload = {
-    name: document.getElementById('editName').value.trim(),
-    department: document.getElementById('editDepartment').value.trim(),
-    project: document.getElementById('editProject').value.trim(),
-    date: document.getElementById('editDate').value,
-    location: document.getElementById('editLocation').value.trim(),
-    contact: document.getElementById('editContact').value.trim()
+    name: (document.getElementById('editName')?.value || '').trim(),
+    department: (document.getElementById('editDepartment')?.value || '').trim(),
+    project: (document.getElementById('editProject')?.value || '').trim(),
+    date: document.getElementById('editDate')?.value || '',
+    location: (document.getElementById('editLocation')?.value || '').trim(),
+    contact: (document.getElementById('editContact')?.value || '').trim()
   };
 
   try {
@@ -497,30 +622,43 @@ async function handleEditEmployee(e) {
       await loadEmployees();
       await loadStats();
     } else {
-      showToast('Failed to update employee', 'error');
+      const err = await res.json().catch(() => ({}));
+      showToast(err.message || 'Failed to update employee', 'error');
     }
   } catch (err) {
     console.error('Error updating employee:', err);
     showToast('Network error updating employee', 'error');
   } finally {
-    submitBtn.disabled = false;
-    submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Changes';
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Update Changes';
+    }
   }
 }
 
 window.openPhotoModal = function(id) {
-  document.getElementById('photoEmpId').value = id;
-  document.getElementById('uploadPhotoForm').reset();
-  document.getElementById('photoModalPreview').style.display = 'none';
-  document.getElementById('photoDropzonePrompt').style.display = 'block';
+  const photoEmpId = document.getElementById('photoEmpId');
+  if (photoEmpId) photoEmpId.value = id;
+  const form = document.getElementById('uploadPhotoForm');
+  if (form) form.reset();
+  const preview = document.getElementById('photoModalPreview');
+  const prompt = document.getElementById('photoDropzonePrompt');
+  if (preview) {
+    preview.src = '';
+    preview.style.display = 'none';
+  }
+  if (prompt) prompt.style.display = 'block';
+
   openModal(uploadPhotoModal);
 };
 
 async function handleUploadPhoto(e) {
   e.preventDefault();
-  const id = document.getElementById('photoEmpId').value;
+  const idInput = document.getElementById('photoEmpId');
+  const id = idInput ? idInput.value : null;
   const fileInput = document.getElementById('modalPhotoFile');
-  if (!fileInput.files || fileInput.files.length === 0) {
+
+  if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
     showToast('Please select a photo first', 'error');
     return;
   }
@@ -539,7 +677,8 @@ async function handleUploadPhoto(e) {
       closeAllModals();
       await loadEmployees();
     } else {
-      showToast('Failed to upload photo', 'error');
+      const err = await res.json().catch(() => ({}));
+      showToast(err.message || 'Failed to upload photo', 'error');
     }
   } catch (err) {
     console.error('Error uploading photo:', err);
@@ -547,7 +686,10 @@ async function handleUploadPhoto(e) {
   }
 }
 
-window.confirmDeleteEmployee = async function(id, name) {
+window.confirmDeleteEmployee = async function(id) {
+  const emp = state.employees.find(e => e.id === id);
+  const name = emp && emp.name ? emp.name : `ID #${id}`;
+
   if (confirm(`Are you sure you want to delete employee "${name}" (ID #${id})?`)) {
     try {
       const res = await fetch(`${API_BASE}/api/employees/${id}`, {
@@ -559,7 +701,8 @@ window.confirmDeleteEmployee = async function(id, name) {
         await loadEmployees();
         await loadStats();
       } else {
-        showToast('Failed to delete employee', 'error');
+        const err = await res.json().catch(() => ({}));
+        showToast(err.message || 'Failed to delete employee', 'error');
       }
     } catch (err) {
       console.error('Error deleting employee:', err);
@@ -577,20 +720,20 @@ async function checkAuthSession() {
     if (res.ok) {
       const data = await res.json();
       state.currentUser = data.username;
-      renderAuthNav();
     } else {
       state.currentUser = null;
-      renderAuthNav();
     }
   } catch (err) {
     state.currentUser = null;
-    renderAuthNav();
   }
+  renderAuthNav();
 }
 
 function renderAuthNav() {
+  if (!authNavContainer) return;
+
   if (state.currentUser) {
-    const initials = state.currentUser.substring(0, 2).toUpperCase();
+    const initials = escapeHtml(state.currentUser.substring(0, 2).toUpperCase());
     authNavContainer.innerHTML = `
       <div style="display: flex; align-items: center; gap: 10px;">
         <div class="user-badge">
@@ -604,7 +747,7 @@ function renderAuthNav() {
     `;
   } else {
     authNavContainer.innerHTML = `
-      <button class="btn btn-primary btn-sm" onclick="openModal(authModal)">
+      <button class="btn btn-primary btn-sm" onclick="openModal(document.getElementById('authModal'))">
         <i class="fa-solid fa-right-to-bracket"></i> Sign In
       </button>
     `;
@@ -613,8 +756,13 @@ function renderAuthNav() {
 
 async function handleSignIn(e) {
   e.preventDefault();
-  const username = document.getElementById('loginUsername').value.trim();
-  const password = document.getElementById('loginPassword').value.trim();
+  const username = (document.getElementById('loginUsername')?.value || '').trim();
+  const password = (document.getElementById('loginPassword')?.value || '').trim();
+
+  if (!username || !password) {
+    showToast('Username and password are required', 'error');
+    return;
+  }
 
   try {
     const res = await fetch(`${API_BASE}/api/auth/signin`, {
@@ -641,9 +789,14 @@ async function handleSignIn(e) {
 
 async function handleSignUp(e) {
   e.preventDefault();
-  const username = document.getElementById('regUsername').value.trim();
-  const email = document.getElementById('regEmail').value.trim();
-  const password = document.getElementById('regPassword').value.trim();
+  const username = (document.getElementById('regUsername')?.value || '').trim();
+  const email = (document.getElementById('regEmail')?.value || '').trim();
+  const password = (document.getElementById('regPassword')?.value || '').trim();
+
+  if (!username || !password) {
+    showToast('Username and password are required', 'error');
+    return;
+  }
 
   try {
     const res = await fetch(`${API_BASE}/api/auth/signup`, {
@@ -690,7 +843,7 @@ window.handleLogout = async function() {
 // Helpers: Modals, Toast, Utilities
 // ==========================================
 function openModal(modal) {
-  modal.classList.add('active');
+  if (modal) modal.classList.add('active');
 }
 
 function closeAllModals() {
@@ -701,6 +854,8 @@ function closeAllModals() {
 
 function showToast(message, type = 'info') {
   const container = document.getElementById('toastContainer');
+  if (!container) return;
+
   const toast = document.createElement('div');
   toast.className = `toast ${type}`;
 
@@ -725,7 +880,7 @@ function showToast(message, type = 'info') {
 }
 
 function getInitials(name) {
-  if (!name) return 'EMP';
+  if (!name || !name.trim()) return 'EMP';
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();

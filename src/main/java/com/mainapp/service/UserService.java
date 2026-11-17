@@ -13,25 +13,36 @@ import com.mainapp.respository.UserRespository;
 public class UserService {
 
 	@Autowired
-	UserRespository uRepo;
+	private UserRespository uRepo;
 
 	@Autowired
-	PasswordEncoder passwordEncoder;
+	private PasswordEncoder passwordEncoder;
 
-	/** Returns true if the account was created, false if the username was already taken. */
+	/** Returns true if the account was created, false if username exists or input is invalid. */
 	public boolean addUser(User u) {
-		Optional<User> existing = uRepo.findById(u.getUsername());
-		if (existing.isPresent()) {
+		if (u == null || u.getUsername() == null || u.getUsername().trim().isEmpty()
+				|| u.getPassword() == null || u.getPassword().trim().isEmpty()) {
 			return false;
 		}
-		u.setPassword(passwordEncoder.encode(u.getPassword()));
+		String username = u.getUsername().trim();
+		if (uRepo.existsById(username)) {
+			return false;
+		}
+		u.setUsername(username);
+		if (u.getEmail() != null) {
+			u.setEmail(u.getEmail().trim());
+		}
+		u.setPassword(passwordEncoder.encode(u.getPassword().trim()));
 		uRepo.save(u);
 		return true;
 	}
 
 	/** Returns the user if credentials match, otherwise empty. */
 	public Optional<User> authenticate(String username, String rawPassword) {
-		return uRepo.findById(username)
+		if (username == null || rawPassword == null || username.isBlank() || rawPassword.isBlank()) {
+			return Optional.empty();
+		}
+		return uRepo.findById(username.trim())
 				.filter(u -> {
 					if (u.getPassword() == null) {
 						return false;
@@ -51,6 +62,9 @@ public class UserService {
 	}
 
 	public Optional<User> getUser(String name) {
-		return uRepo.findById(name);
+		if (name == null || name.isBlank()) {
+			return Optional.empty();
+		}
+		return uRepo.findById(name.trim());
 	}
 }

@@ -8,26 +8,49 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table
+@Table(name = "employee")
 public class Employee {
+
 	@Id
-	@Column
+	@Column(name = "id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	int id;
-	@Column
-	String name;
-	@Column
-	String imageName;
-	@Column
-	String department;
-	@Column
-	String project;
-	@Column
-	String date;
-	@Column
-	String location;
-	@Column
-	String contact;
+	private int id;
+
+	@Column(name = "name")
+	private String name;
+
+	@Column(name = "image_name")
+	private String imageName;
+
+	@Column(name = "department")
+	private String department;
+
+	@Column(name = "project")
+	private String project;
+
+	@Column(name = "date")
+	private String date;
+
+	@Column(name = "location")
+	private String location;
+
+	@Column(name = "contact")
+	private String contact;
+
+	public Employee() {
+	}
+
+	public Employee(int id, String name, String imageName, String department, String project, String date,
+			String location, String contact) {
+		this.id = id;
+		this.name = name;
+		this.imageName = imageName;
+		this.department = department;
+		this.project = project;
+		this.date = date;
+		this.location = location;
+		this.contact = contact;
+	}
 
 	public int getId() {
 		return id;
@@ -98,5 +121,4 @@ public class Employee {
 		return "Employee [id=" + id + ", name=" + name + ", imageName=" + imageName + ", department=" + department
 				+ ", project=" + project + ", date=" + date + ", location=" + location + ", contact=" + contact + "]";
 	}
-
 }

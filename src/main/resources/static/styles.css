@@ -1,73 +1,112 @@
 /* ============================================================
-   EMPLOYEE MANAGEMENT SYSTEM - MODERN DESIGN SYSTEM
+   STAFFSYNC - BOTANICAL FOREST & CLAY EARTH DESIGN SYSTEM
+   Inspired by natural botanical leaves, warm clay & golden sand
    ============================================================ */
 
 :root {
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-heading: 'Outfit', var(--font-sans);
 
-  /* Color Palette - Vibrant Indigo / Violet Accent */
-  --primary-50: #eef2ff;
-  --primary-100: #e0e7ff;
-  --primary-200: #c7d2fe;
-  --primary-400: #818cf8;
-  --primary-500: #6366f1;
-  --primary-600: #4f46e5;
-  --primary-700: #4338ca;
+  /* Deep Botanical Forest Greens */
+  --forest-900: #0a1610;
+  --forest-800: #0f2319;
+  --forest-700: #173527;
+  --forest-600: #234d3a;
+  --forest-500: #336b51;
+  --forest-400: #498a6a;
+  --forest-300: #6cb08c;
+  --forest-200: #9dd1b6;
+  --forest-100: #d0ebd9;
+  --forest-50:  #f0f7f2;
 
-  --accent-cyan: #06b6d4;
-  --accent-pink: #ec4899;
-  --accent-emerald: #10b981;
-  --accent-amber: #f59e0b;
-  --accent-rose: #f43f5e;
+  /* Earthy Clay & Terracotta */
+  --clay-900: #2d180f;
+  --clay-800: #48271a;
+  --clay-700: #693b27;
+  --clay-600: #8c5035;
+  --clay-500: #ab6443;
+  --clay-400: #c67d59;
+  --clay-300: #dc9b7a;
+  --clay-200: #edbfa5;
 
-  /* Theme: Dark (Default) */
-  --bg-app: #0b0f19;
-  --bg-card: rgba(18, 24, 38, 0.75);
-  --bg-card-hover: rgba(28, 36, 56, 0.85);
-  --bg-glass: rgba(17, 24, 39, 0.65);
-  --bg-input: rgba(15, 23, 42, 0.8);
-  --bg-badge: rgba(99, 102, 241, 0.15);
+  /* Warm Golden Sand, Hazelnut & Caramel */
+  --sand-900: #3a2717;
+  --sand-800: #573c24;
+  --sand-700: #7d5735;
+  --sand-600: #a7774a;
+  --sand-500: #c99664;
+  --sand-400: #d8ad83;
+  --sand-300: #e5c4a5;
+  --sand-200: #f1dbc7;
+  --sand-100: #faefe4;
 
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(99, 102, 241, 0.5);
+  /* Semantic Color Aliases */
+  --primary-50:  var(--forest-50);
+  --primary-100: var(--forest-100);
+  --primary-200: var(--forest-200);
+  --primary-300: var(--forest-300);
+  --primary-400: var(--forest-400);
+  --primary-500: var(--forest-500);
+  --primary-600: var(--forest-600);
+  --primary-700: var(--forest-700);
 
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-dim: #64748b;
+  --accent-clay:       var(--clay-500);
+  --accent-terracotta: var(--clay-400);
+  --accent-sand:       var(--sand-400);
+  --accent-sand-light: var(--sand-300);
+  --accent-bark:       var(--clay-800);
+  --accent-sage:       var(--forest-300);
+  --accent-rose:       #d65555;
+  --accent-emerald:    var(--forest-400);
+  --accent-amber:      var(--sand-500);
 
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.5);
-  --shadow-glow: 0 0 24px rgba(99, 102, 241, 0.25);
+  /* Theme: Dark (Deep Pine Forest & Warm Earth) */
+  --bg-app: #0b1711;
+  --bg-card: rgba(18, 36, 27, 0.78);
+  --bg-card-hover: rgba(26, 49, 38, 0.92);
+  --bg-glass: rgba(14, 29, 22, 0.75);
+  --bg-input: rgba(11, 23, 17, 0.88);
+  --bg-badge: rgba(73, 138, 106, 0.2);
+
+  --border-subtle: rgba(157, 209, 182, 0.12);
+  --border-focus: rgba(216, 173, 131, 0.55);
+
+  --text-main: #f6f4ee;
+  --text-muted: #abbab0;
+  --text-dim: #75897b;
+
+  --shadow-sm: 0 2px 4px rgba(4, 10, 7, 0.35);
+  --shadow-md: 0 8px 24px rgba(4, 10, 7, 0.45);
+  --shadow-lg: 0 16px 36px rgba(4, 10, 7, 0.55);
+  --shadow-glow: 0 0 24px rgba(73, 138, 106, 0.25);
 
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
   --radius-pill: 9999px;
 
-  --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 [data-theme="light"] {
-  --bg-app: #f1f5f9;
-  --bg-card: rgba(255, 255, 255, 0.85);
+  --bg-app: #f4f1ea;
+  --bg-card: rgba(255, 253, 248, 0.9);
   --bg-card-hover: rgba(255, 255, 255, 0.98);
-  --bg-glass: rgba(255, 255, 255, 0.7);
+  --bg-glass: rgba(246, 243, 236, 0.85);
   --bg-input: #ffffff;
-  --bg-badge: rgba(99, 102, 241, 0.1);
+  --bg-badge: rgba(51, 107, 81, 0.12);
 
-  --border-subtle: rgba(15, 23, 42, 0.08);
-  --border-focus: rgba(99, 102, 241, 0.4);
+  --border-subtle: rgba(23, 53, 39, 0.12);
+  --border-focus: rgba(171, 100, 67, 0.5);
 
-  --text-main: #0f172a;
-  --text-muted: #475569;
-  --text-dim: #94a3b8;
+  --text-main: #13231a;
+  --text-muted: #516558;
+  --text-dim: #7f9185;
 
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 16px 32px rgba(0, 0, 0, 0.08);
-  --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.15);
+  --shadow-sm: 0 2px 5px rgba(28, 43, 34, 0.05);
+  --shadow-md: 0 8px 20px rgba(28, 43, 34, 0.08);
+  --shadow-lg: 0 16px 32px rgba(28, 43, 34, 0.1);
+  --shadow-glow: 0 0 20px rgba(73, 138, 106, 0.18);
 }
 
 /* Base Styles */
@@ -86,8 +125,9 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
   background-image: 
-    radial-gradient(circle at 15% 10%, rgba(99, 102, 241, 0.12) 0%, transparent 40%),
-    radial-gradient(circle at 85% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 45%);
+    radial-gradient(circle at 14% 15%, rgba(51, 107, 81, 0.22) 0%, transparent 48%),
+    radial-gradient(circle at 86% 82%, rgba(171, 100, 67, 0.16) 0%, transparent 48%),
+    radial-gradient(circle at 50% 50%, rgba(216, 173, 131, 0.08) 0%, transparent 55%);
   background-attachment: fixed;
 }
 
@@ -128,13 +168,13 @@ body {
   width: 44px;
   height: 44px;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--primary-500), var(--accent-cyan));
+  background: linear-gradient(135deg, #244d3a, #ab6443);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  color: #faf7f2;
   font-size: 20px;
-  box-shadow: var(--shadow-glow);
+  box-shadow: 0 0 20px rgba(51, 107, 81, 0.35);
 }
 
 .brand-text h1 {
@@ -142,7 +182,7 @@ body {
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  background: linear-gradient(135deg, var(--text-main), var(--primary-400));
+  background: linear-gradient(135deg, var(--text-main), var(--sand-400));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -176,12 +216,12 @@ body {
   width: 26px;
   height: 26px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary-400), var(--accent-pink));
+  background: linear-gradient(135deg, var(--sand-400), var(--clay-400));
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 11px;
-  color: white;
+  color: #24160e;
   font-weight: bold;
 }
 
@@ -207,7 +247,7 @@ body {
   transform: translateY(-2px);
 }
 
-/* Buttons */
+/* Buttons - Inspired by the Warm Sand / Camel Pill Button */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -223,14 +263,15 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--primary-600), var(--primary-500));
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  background: linear-gradient(135deg, #d8ad83, #be8f65);
+  color: #1e130a;
+  font-weight: 700;
+  box-shadow: 0 4px 15px rgba(190, 143, 101, 0.35);
 }
 
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--primary-500), var(--primary-400));
-  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+  background: linear-gradient(135deg, #e4be96, #cd9d73);
+  box-shadow: 0 6px 22px rgba(190, 143, 101, 0.52);
   transform: translateY(-2px);
 }
 
@@ -247,24 +288,24 @@ body {
 }
 
 .btn-danger {
-  background: rgba(244, 63, 94, 0.15);
-  color: var(--accent-rose);
-  border: 1px solid rgba(244, 63, 94, 0.3);
+  background: rgba(214, 85, 85, 0.15);
+  color: #e57373;
+  border: 1px solid rgba(214, 85, 85, 0.35);
 }
 
 .btn-danger:hover {
-  background: var(--accent-rose);
+  background: #d65555;
   color: #fff;
   transform: translateY(-2px);
 }
 
 .btn-sm {
-  padding: 6px 12px;
+  padding: 6px 14px;
   font-size: 0.8rem;
   border-radius: var(--radius-sm);
 }
 
-/* Stats Section */
+/* Stats Section - Nature Cards */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -274,8 +315,8 @@ body {
 
 .stat-card {
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 22px 24px;
@@ -299,13 +340,21 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 4px;
+  width: 5px;
   height: 100%;
 }
 
-.stat-card.blue::before { background: var(--primary-500); }
-.stat-card.green::before { background: var(--accent-emerald); }
-.stat-card.amber::before { background: var(--accent-amber); }
+/* Card 1: Lush Forest Green */
+.stat-card.blue::before { background: var(--forest-400); }
+.stat-card.blue .stat-icon { background: rgba(73, 138, 106, 0.18); color: var(--forest-300); }
+
+/* Card 2: Warm Terracotta Clay */
+.stat-card.green::before { background: var(--clay-400); }
+.stat-card.green .stat-icon { background: rgba(198, 125, 89, 0.18); color: var(--clay-300); }
+
+/* Card 3: Golden Sand & Camel */
+.stat-card.amber::before { background: var(--sand-400); }
+.stat-card.amber .stat-icon { background: rgba(216, 173, 131, 0.18); color: var(--sand-400); }
 
 .stat-info span {
   font-size: 0.85rem;
@@ -333,10 +382,6 @@ body {
   font-size: 24px;
 }
 
-.stat-card.blue .stat-icon { background: rgba(99, 102, 241, 0.15); color: var(--primary-400); }
-.stat-card.green .stat-icon { background: rgba(16, 185, 129, 0.15); color: var(--accent-emerald); }
-.stat-card.amber .stat-icon { background: rgba(245, 158, 11, 0.15); color: var(--accent-amber); }
-
 /* Main Action Bar / Controls */
 .controls-bar {
   display: flex;
@@ -345,7 +390,7 @@ body {
   justify-content: space-between;
   gap: 16px;
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: 16px 20px;
@@ -390,8 +435,8 @@ body {
 }
 
 .search-input:focus {
-  border-color: var(--primary-500);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  border-color: var(--sand-400);
+  box-shadow: 0 0 0 3px rgba(216, 173, 131, 0.25);
 }
 
 .select-filter {
@@ -407,7 +452,8 @@ body {
 }
 
 .select-filter:focus {
-  border-color: var(--primary-500);
+  border-color: var(--sand-400);
+  box-shadow: 0 0 0 3px rgba(216, 173, 131, 0.25);
 }
 
 .view-controls {
@@ -436,8 +482,9 @@ body {
 }
 
 .view-toggle.active {
-  background: var(--primary-600);
+  background: linear-gradient(135deg, #336b51, #234d3a);
   color: #fff;
+  box-shadow: 0 2px 8px rgba(35, 77, 58, 0.35);
 }
 
 /* Employee Cards Grid */
@@ -449,8 +496,8 @@ body {
 
 .employee-card {
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   overflow: hidden;
@@ -469,7 +516,7 @@ body {
 
 .card-banner {
   height: 80px;
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(6, 182, 212, 0.2));
+  background: linear-gradient(135deg, rgba(35, 77, 58, 0.45), rgba(171, 100, 67, 0.35));
   position: relative;
 }
 
@@ -492,7 +539,7 @@ body {
   object-fit: cover;
   border: 4px solid var(--bg-app);
   box-shadow: var(--shadow-md);
-  background: #1e293b;
+  background: #172b20;
   display: block;
 }
 
@@ -502,8 +549,8 @@ body {
   border-radius: 50%;
   border: 4px solid var(--bg-app);
   box-shadow: var(--shadow-md);
-  background: linear-gradient(135deg, var(--primary-600), var(--accent-pink));
-  color: white;
+  background: linear-gradient(135deg, #2b5640, #ab6443);
+  color: #faf7f2;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -513,13 +560,13 @@ body {
 }
 
 .emp-id-badge {
-  background: var(--bg-badge);
-  color: var(--primary-400);
+  background: rgba(216, 173, 131, 0.16);
+  color: var(--sand-400);
   font-size: 0.75rem;
   font-weight: 700;
   padding: 4px 10px;
   border-radius: var(--radius-pill);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  border: 1px solid rgba(216, 173, 131, 0.32);
 }
 
 .card-body {
@@ -537,13 +584,14 @@ body {
 
 .emp-department {
   display: inline-block;
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--accent-emerald);
+  background: rgba(73, 138, 106, 0.2);
+  color: var(--forest-300);
   padding: 3px 10px;
   border-radius: var(--radius-pill);
   font-size: 0.75rem;
   font-weight: 600;
   margin-bottom: 16px;
+  border: 1px solid rgba(73, 138, 106, 0.28);
 }
 
 .emp-details {
@@ -564,7 +612,7 @@ body {
 
 .detail-row i {
   width: 18px;
-  color: var(--primary-400);
+  color: var(--sand-400);
   text-align: center;
   font-size: 14px;
 }
@@ -576,7 +624,7 @@ body {
 
 .card-footer {
   padding: 14px 20px;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(0, 0, 0, 0.12);
   border-top: 1px solid var(--border-subtle);
   display: flex;
   align-items: center;
@@ -587,7 +635,7 @@ body {
 /* Employee Table View */
 .table-container {
   background: var(--bg-card);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   overflow-x: auto;
@@ -602,7 +650,7 @@ body {
 }
 
 .styled-table th {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.22);
   padding: 14px 18px;
   font-weight: 600;
   color: var(--text-muted);
@@ -634,16 +682,23 @@ body {
   height: 40px;
   border-radius: 50%;
   object-fit: cover;
-  background: #1e293b;
+  background: #172b20;
+}
+
+.table-avatar-placeholder {
+  width: 40px !important;
+  height: 40px !important;
+  font-size: 14px !important;
+  border-width: 2px !important;
 }
 
 /* Modals */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(5, 12, 8, 0.75);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -661,7 +716,7 @@ body {
 
 .modal-box {
   background: var(--bg-card);
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   width: 100%;
@@ -722,8 +777,8 @@ body {
 }
 
 .form-input:focus {
-  border-color: var(--primary-500);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+  border-color: var(--sand-400);
+  box-shadow: 0 0 0 3px rgba(216, 173, 131, 0.25);
 }
 
 .form-grid {
@@ -745,8 +800,14 @@ body {
 }
 
 .file-dropzone:hover {
-  border-color: var(--primary-500);
-  background: rgba(99, 102, 241, 0.05);
+  border-color: var(--sand-400);
+  background: rgba(216, 173, 131, 0.06);
+}
+
+.file-dropzone.drag-active {
+  border-color: var(--sand-400);
+  background: rgba(216, 173, 131, 0.15);
+  transform: scale(1.02);
 }
 
 .file-dropzone input[type="file"] {
@@ -763,7 +824,7 @@ body {
   object-fit: cover;
   margin: 0 auto 10px;
   display: block;
-  border: 2px solid var(--primary-500);
+  border: 2px solid var(--sand-400);
 }
 
 /* Empty State */
@@ -823,9 +884,9 @@ body {
   transition: transform 0.2s ease, opacity 0.2s ease;
 }
 
-.toast.success { border-left: 4px solid var(--accent-emerald); }
-.toast.error { border-left: 4px solid var(--accent-rose); }
-.toast.info { border-left: 4px solid var(--primary-500); }
+.toast.success { border-left: 4px solid var(--forest-400); }
+.toast.error   { border-left: 4px solid var(--accent-rose); }
+.toast.info    { border-left: 4px solid var(--sand-400); }
 
 @keyframes slideInRight {
   from {
@@ -859,8 +920,8 @@ body {
 }
 
 .auth-tab-btn.active {
-  color: var(--primary-400);
-  border-bottom-color: var(--primary-500);
+  color: var(--sand-400);
+  border-bottom-color: var(--sand-400);
 }
 
 /* Responsive */

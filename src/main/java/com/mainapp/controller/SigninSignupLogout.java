@@ -1,80 +1,3 @@
-// package com.mainapp.controller;
-
-// import java.util.List;
-
-// import org.springframework.beans.factory.annotation.Autowired;
-// import org.springframework.stereotype.Controller;
-// import org.springframework.ui.Model;
-// import org.springframework.web.bind.annotation.ModelAttribute;
-// import org.springframework.web.bind.annotation.RequestMapping;
-// import org.springframework.web.bind.annotation.RequestParam;
-
-// import com.mainapp.entity.Employee;
-// import com.mainapp.entity.User;
-// import com.mainapp.service.EmployeeService;
-// import com.mainapp.service.UserService;
-
-// import jakarta.servlet.http.HttpServletRequest;
-// import jakarta.servlet.http.HttpSession;
-// @Controller
-// public class SigninSignupLogout {
-// 	@Autowired
-// 	UserService uService;
-// 	@Autowired
-// 	EmployeeService eService;
-
-// 	@RequestMapping (value ="/")
-// 	public String  showSignupAndSignin() {
-// 		return "SignupAndSignin";
-		
-// 	}
-// 	@RequestMapping(value="/signup")
-// 	public String handleSignup(@ModelAttribute User u,HttpServletRequest req)
-// 	{
-// 		String status =uService.addUser(u);
-// 		HttpSession s=req.getSession();
-// 		s.setAttribute("msg",status);
-		
-// 		return "redirect:/";
-// 	}
-// 	@RequestMapping(value="/signin")
-// 	public String handleSignin(@RequestParam("username") String name, @RequestParam("password") String pass, HttpServletRequest req , Model model
-// 			)
-// 	{
-// 			String status =uService.checkUser(name,pass);
-// 			if(status.equals("exists"))
-// 			{
-// 				User u=uService.getUser(name);
-// 				req.getSession().setAttribute("token", u);
-				
-// 				List<Employee> le=eService.readAll();
-// 				long ec=eService.empCount();
-// 				long dc=eService.depCount();
-// 				long pc=eService.proCount();
-				
-// 				model.addAttribute("le",le);
-// 				model.addAttribute("ec",ec);
-// 				model.addAttribute("pc",pc);
-// 				model.addAttribute("dc",dc);
-				
-				
-
-				
-// 				return "dashboard";
-				
-// 			}
-// 			else{
-// 				req.getSession().setAttribute("msg",status);
-// 				return "redirect:/";
-// 			}	
-// 	}
-// 	public String handleLogout(HttpServletRequest req)
-// 	{
-// 		req.getSession().removeAttribute("token");
-// 		req.getSession().setAttribute("msg", "you have been logout Succesfully");
-// 		return "SignupAndSignin";
-// 	}
-// }
 package com.mainapp.controller;
 
 import java.util.Map;
@@ -99,24 +22,40 @@ import jakarta.servlet.http.HttpSession;
 public class SigninSignupLogout {
 
 	@Autowired
-	UserService uService;
+	private UserService uService;
 
 	@PostMapping("/signup")
-	public ResponseEntity<Map<String, String>> signup(@RequestBody User u) {
+	public ResponseEntity<Map<String, String>> signup(@RequestBody(required = false) User u) {
+		if (u == null || u.getUsername() == null || u.getUsername().trim().isEmpty()
+				|| u.getPassword() == null || u.getPassword().trim().isEmpty()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(Map.of("message", "Username and password cannot be empty"));
+		}
+
 		boolean created = uService.addUser(u);
 		if (created) {
-			return ResponseEntity.status(HttpStatus.CREATED).body(Map.of("message", "Account created successfully"));
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body(Map.of("message", "Account created successfully"));
 		}
-		return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "Username already taken"));
+		return ResponseEntity.status(HttpStatus.CONFLICT)
+				.body(Map.of("message", "Username already taken"));
 	}
 
 	@PostMapping("/signin")
-	public ResponseEntity<?> signin(@RequestBody User credentials, HttpServletRequest req) {
-		return uService.authenticate(credentials.getUsername(), credentials.getPassword())
+	public ResponseEntity<?> signin(@RequestBody(required = false) User credentials, HttpServletRequest req) {
+		if (credentials == null || credentials.getUsername() == null || credentials.getPassword() == null
+				|| credentials.getUsername().trim().isEmpty() || credentials.getPassword().trim().isEmpty()) {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+					.body(Map.of("message", "Username and password are required"));
+		}
+
+		return uService.authenticate(credentials.getUsername().trim(), credentials.getPassword().trim())
 				.map(user -> {
-					HttpSession session = req.getSession();
+					HttpSession session = req.getSession(true);
 					session.setAttribute("username", user.getUsername());
-					return ResponseEntity.ok(Map.of("username", user.getUsername(), "email", user.getEmail()));
+					return ResponseEntity.ok(Map.of(
+							"username", user.getUsername(),
+							"email", user.getEmail() != null ? user.getEmail() : ""));
 				})
 				.orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
 						.body(Map.of("message", "Invalid username or password")));
@@ -131,12 +70,17 @@ public class SigninSignupLogout {
 		return ResponseEntity.ok(Map.of("message", "Logged out successfully"));
 	}
 
-	// lets the frontend check "am I still logged in?" on page load/refresh
+	// Frontend session check: verifies if session is active on page load/refresh
 	@GetMapping("/me")
 	public ResponseEntity<?> me(HttpServletRequest req) {
 		HttpSession session = req.getSession(false);
 		if (session != null && session.getAttribute("username") != null) {
-			return ResponseEntity.ok(Map.of("username", session.getAttribute("username")));
+			String username = (String) session.getAttribute("username");
+			return uService.getUser(username)
+					.map(user -> ResponseEntity.ok(Map.of(
+							"username", user.getUsername(),
+							"email", user.getEmail() != null ? user.getEmail() : "")))
+					.orElseGet(() -> ResponseEntity.ok(Map.of("username", username)));
 		}
 		return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "Not signed in"));
 	}

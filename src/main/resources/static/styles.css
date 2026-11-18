@@ -225,6 +225,27 @@ body {
   font-weight: bold;
 }
 
+.role-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.role-badge.admin {
+  background: rgba(216, 173, 131, 0.2);
+  color: var(--sand-400);
+  border: 1px solid rgba(216, 173, 131, 0.35);
+}
+
+.role-badge.user {
+  background: rgba(73, 138, 106, 0.2);
+  color: var(--forest-300);
+  border: 1px solid rgba(73, 138, 106, 0.35);
+}
+
 /* Theme Toggle Button */
 .theme-btn, .icon-btn {
   width: 40px;

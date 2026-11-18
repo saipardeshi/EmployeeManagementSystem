@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import com.mainapp.entity.User;
 import com.mainapp.respository.UserRespository;
 
+import jakarta.annotation.PostConstruct;
+
 @Service
 public class UserService {
 
@@ -17,6 +19,45 @@ public class UserService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@PostConstruct
+	public void initDefaultAccounts() {
+		// Ensure default Admin exists with ROLE_ADMIN
+		Optional<User> adminOpt = uRepo.findById("admin");
+		if (adminOpt.isEmpty()) {
+			User admin = new User("admin", passwordEncoder.encode("123"), "admin@staffsync.com", "ROLE_ADMIN");
+			uRepo.save(admin);
+		} else {
+			User admin = adminOpt.get();
+			if (admin.getRole() == null || !"ROLE_ADMIN".equals(admin.getRole())) {
+				admin.setRole("ROLE_ADMIN");
+				uRepo.save(admin);
+			}
+		}
+
+		// Ensure default Normal User exists with ROLE_USER
+		Optional<User> userOpt = uRepo.findById("user");
+		if (userOpt.isEmpty()) {
+			User normalUser = new User("user", passwordEncoder.encode("123"), "user@staffsync.com", "ROLE_USER");
+			uRepo.save(normalUser);
+		} else {
+			User normalUser = userOpt.get();
+			if (normalUser.getRole() == null || !"ROLE_USER".equals(normalUser.getRole())) {
+				normalUser.setRole("ROLE_USER");
+				uRepo.save(normalUser);
+			}
+		}
+
+		// Update existing user 'abhi' to ROLE_USER if role is null
+		Optional<User> abhiOpt = uRepo.findById("abhi");
+		if (abhiOpt.isPresent()) {
+			User abhi = abhiOpt.get();
+			if (abhi.getRole() == null) {
+				abhi.setRole("ROLE_USER");
+				uRepo.save(abhi);
+			}
+		}
+	}
 
 	/** Returns true if the account was created, false if username exists or input is invalid. */
 	public boolean addUser(User u) {
@@ -32,6 +73,18 @@ public class UserService {
 		if (u.getEmail() != null) {
 			u.setEmail(u.getEmail().trim());
 		}
+
+		// Assign default role: username 'admin' gets ROLE_ADMIN, all other signups get ROLE_USER
+		if (u.getRole() == null || u.getRole().isBlank()) {
+			u.setRole("admin".equalsIgnoreCase(username) ? "ROLE_ADMIN" : "ROLE_USER");
+		} else {
+			String r = u.getRole().trim().toUpperCase();
+			if (!r.startsWith("ROLE_")) {
+				r = "ROLE_" + r;
+			}
+			u.setRole(r);
+		}
+
 		u.setPassword(passwordEncoder.encode(u.getPassword().trim()));
 		uRepo.save(u);
 		return true;

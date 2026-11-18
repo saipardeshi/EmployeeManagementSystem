@@ -1,12 +1,14 @@
 /**
  * StaffSync - Employee Management System
- * Interactive Client Logic
+ * Interactive Client Logic with Role-Based Access Control (RBAC) & JWT
  */
 
 // Configuration & State
-const API_BASE = ''; // Relative path for Spring Boot
+const API_BASE = '';
 let state = {
   currentUser: null,
+  currentRole: null, // 'ROLE_ADMIN' | 'ROLE_USER'
+  authToken: localStorage.getItem('auth_token') || null,
   employees: [],
   departments: new Set(),
   currentView: 'grid', // 'grid' | 'table'
@@ -44,6 +46,24 @@ document.addEventListener('DOMContentLoaded', () => {
   loadStats();
   loadEmployees();
 });
+
+// Helper: Wrapper for fetch with JWT Authorization header
+function apiFetch(url, options = {}) {
+  options.headers = options.headers || {};
+  if (state.authToken) {
+    if (options.headers instanceof Headers) {
+      options.headers.set('Authorization', `Bearer ${state.authToken}`);
+    } else {
+      options.headers['Authorization'] = `Bearer ${state.authToken}`;
+    }
+  }
+  return fetch(url, options);
+}
+
+// Role Check Helper
+function isAdmin() {
+  return state.currentUser && (state.currentRole === 'ROLE_ADMIN' || state.currentRole === 'ADMIN');
+}
 
 // ==========================================
 // Theme Management
@@ -113,6 +133,10 @@ function setupEventListeners() {
   const openAddBtn = document.getElementById('openAddModalBtn');
   if (openAddBtn) {
     openAddBtn.addEventListener('click', () => {
+      if (!isAdmin()) {
+        showToast('Access Denied: Admin role required to add employees', 'error');
+        return;
+      }
       resetAddForm();
       openModal(addEmployeeModal);
     });
@@ -217,13 +241,23 @@ function setupEventListeners() {
     signUpForm.addEventListener('submit', handleSignUp);
   }
 
-  // Quick Demo credentials button
-  const quickDemoBtn = document.getElementById('quickDemoBtn');
-  if (quickDemoBtn) {
-    quickDemoBtn.addEventListener('click', () => {
+  // Quick Demo credentials buttons
+  const quickDemoAdminBtn = document.getElementById('quickDemoAdminBtn');
+  if (quickDemoAdminBtn) {
+    quickDemoAdminBtn.addEventListener('click', () => {
       const u = document.getElementById('loginUsername');
       const p = document.getElementById('loginPassword');
       if (u) u.value = 'admin';
+      if (p) p.value = '123';
+    });
+  }
+
+  const quickDemoUserBtn = document.getElementById('quickDemoUserBtn');
+  if (quickDemoUserBtn) {
+    quickDemoUserBtn.addEventListener('click', () => {
+      const u = document.getElementById('loginUsername');
+      const p = document.getElementById('loginPassword');
+      if (u) u.value = 'user';
       if (p) p.value = '123';
     });
   }
@@ -288,7 +322,7 @@ function resetAddForm() {
 // ==========================================
 async function loadStats() {
   try {
-    const res = await fetch(`${API_BASE}/api/employees/stats`);
+    const res = await apiFetch(`${API_BASE}/api/employees/stats`);
     if (res.ok) {
       const stats = await res.json();
       if (statEmployeeCount) statEmployeeCount.textContent = stats.employeeCount || 0;
@@ -302,7 +336,7 @@ async function loadStats() {
 
 async function loadEmployees() {
   try {
-    const res = await fetch(`${API_BASE}/api/employees`);
+    const res = await apiFetch(`${API_BASE}/api/employees`);
     if (res.ok) {
       state.employees = await res.json();
       updateDepartmentFilterOptions();
@@ -342,7 +376,7 @@ function updateDepartmentFilterOptions() {
 }
 
 // ==========================================
-// Rendering: Grid & Table
+// Rendering: Grid & Table (Role-Aware)
 // ==========================================
 function renderEmployees() {
   const filtered = state.employees.filter(emp => {
@@ -397,6 +431,8 @@ function renderGridView(list) {
     return;
   }
 
+  const adminActive = isAdmin();
+
   employeeGridContainer.innerHTML = list.map(emp => {
     const initials = escapeHtml(getInitials(emp.name));
     const photoSrc = emp.imageName ? `/images/${encodeURIComponent(emp.imageName)}` : '';
@@ -445,15 +481,21 @@ function renderGridView(list) {
         </div>
 
         <div class="card-footer">
-          <button class="icon-btn" title="Update Photo" onclick="openPhotoModal(${emp.id})">
-            <i class="fa-solid fa-camera"></i>
-          </button>
-          <button class="btn btn-secondary btn-sm" onclick="openEditModal(${emp.id})">
-            <i class="fa-solid fa-pen-to-square"></i> Edit
-          </button>
-          <button class="btn btn-danger btn-sm" title="Delete Employee" onclick="confirmDeleteEmployee(${emp.id})">
-            <i class="fa-solid fa-trash"></i>
-          </button>
+          ${adminActive ? `
+            <button class="icon-btn" title="Update Photo (Admin)" onclick="openPhotoModal(${emp.id})">
+              <i class="fa-solid fa-camera"></i>
+            </button>
+            <button class="btn btn-secondary btn-sm" title="Edit Employee (Admin)" onclick="openEditModal(${emp.id})">
+              <i class="fa-solid fa-pen-to-square"></i> Edit
+            </button>
+            <button class="btn btn-danger btn-sm" title="Delete Employee (Admin)" onclick="confirmDeleteEmployee(${emp.id})">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          ` : `
+            <span style="font-size: 0.78rem; color: var(--text-dim); display: inline-flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-eye" style="font-size: 11px;"></i> Directory View
+            </span>
+          `}
         </div>
       </div>
     `;
@@ -473,6 +515,8 @@ function renderTableView(list) {
     `;
     return;
   }
+
+  const adminActive = isAdmin();
 
   employeeTableBody.innerHTML = list.map(emp => {
     const initials = escapeHtml(getInitials(emp.name));
@@ -500,17 +544,21 @@ function renderTableView(list) {
         <td>${escapeHtml(emp.location || 'Remote')}</td>
         <td>${escapeHtml(emp.contact || 'None')}</td>
         <td style="text-align: right;">
-          <div style="display: inline-flex; gap: 6px;">
-            <button class="icon-btn" style="width:32px;height:32px;font-size:12px;" title="Update Photo" onclick="openPhotoModal(${emp.id})">
-              <i class="fa-solid fa-camera"></i>
-            </button>
-            <button class="btn btn-secondary btn-sm" title="Edit Employee" onclick="openEditModal(${emp.id})">
-              <i class="fa-solid fa-pen"></i>
-            </button>
-            <button class="btn btn-danger btn-sm" title="Delete Employee" onclick="confirmDeleteEmployee(${emp.id})">
-              <i class="fa-solid fa-trash"></i>
-            </button>
-          </div>
+          ${adminActive ? `
+            <div style="display: inline-flex; gap: 6px;">
+              <button class="icon-btn" style="width:32px;height:32px;font-size:12px;" title="Update Photo" onclick="openPhotoModal(${emp.id})">
+                <i class="fa-solid fa-camera"></i>
+              </button>
+              <button class="btn btn-secondary btn-sm" title="Edit Employee" onclick="openEditModal(${emp.id})">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn btn-danger btn-sm" title="Delete Employee" onclick="confirmDeleteEmployee(${emp.id})">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          ` : `
+            <span style="font-size: 0.75rem; color: var(--text-dim);">View Only</span>
+          `}
         </td>
       </tr>
     `;
@@ -526,10 +574,15 @@ window.resetFilters = function() {
 };
 
 // ==========================================
-// CRUD Operations
+// CRUD Operations (RBAC Protected)
 // ==========================================
 async function handleAddEmployee(e) {
   e.preventDefault();
+  if (!isAdmin()) {
+    showToast('Access Denied: Admin privileges required to add employees', 'error');
+    return;
+  }
+
   const form = e.target;
   const submitBtn = document.getElementById('saveAddEmployeeBtn');
   if (submitBtn) {
@@ -539,7 +592,7 @@ async function handleAddEmployee(e) {
 
   try {
     const formData = new FormData(form);
-    const res = await fetch(`${API_BASE}/api/employees`, {
+    const res = await apiFetch(`${API_BASE}/api/employees`, {
       method: 'POST',
       body: formData
     });
@@ -566,6 +619,11 @@ async function handleAddEmployee(e) {
 }
 
 window.openEditModal = function(id) {
+  if (!isAdmin()) {
+    showToast('Access Denied: Admin privileges required to edit employees', 'error');
+    return;
+  }
+
   const emp = state.employees.find(e => e.id === id);
   if (!emp) return;
 
@@ -590,6 +648,11 @@ window.openEditModal = function(id) {
 
 async function handleEditEmployee(e) {
   e.preventDefault();
+  if (!isAdmin()) {
+    showToast('Access Denied: Admin privileges required', 'error');
+    return;
+  }
+
   const idInput = document.getElementById('editEmpId');
   const id = idInput ? idInput.value : null;
   if (!id) return;
@@ -610,7 +673,7 @@ async function handleEditEmployee(e) {
   };
 
   try {
-    const res = await fetch(`${API_BASE}/api/employees/${id}`, {
+    const res = await apiFetch(`${API_BASE}/api/employees/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
@@ -637,6 +700,11 @@ async function handleEditEmployee(e) {
 }
 
 window.openPhotoModal = function(id) {
+  if (!isAdmin()) {
+    showToast('Access Denied: Admin privileges required to update photos', 'error');
+    return;
+  }
+
   const photoEmpId = document.getElementById('photoEmpId');
   if (photoEmpId) photoEmpId.value = id;
   const form = document.getElementById('uploadPhotoForm');
@@ -654,6 +722,11 @@ window.openPhotoModal = function(id) {
 
 async function handleUploadPhoto(e) {
   e.preventDefault();
+  if (!isAdmin()) {
+    showToast('Access Denied: Admin privileges required', 'error');
+    return;
+  }
+
   const idInput = document.getElementById('photoEmpId');
   const id = idInput ? idInput.value : null;
   const fileInput = document.getElementById('modalPhotoFile');
@@ -667,7 +740,7 @@ async function handleUploadPhoto(e) {
   formData.append('image', fileInput.files[0]);
 
   try {
-    const res = await fetch(`${API_BASE}/api/employees/${id}/photo`, {
+    const res = await apiFetch(`${API_BASE}/api/employees/${id}/photo`, {
       method: 'POST',
       body: formData
     });
@@ -687,12 +760,17 @@ async function handleUploadPhoto(e) {
 }
 
 window.confirmDeleteEmployee = async function(id) {
+  if (!isAdmin()) {
+    showToast('Access Denied: Admin privileges required to delete employees', 'error');
+    return;
+  }
+
   const emp = state.employees.find(e => e.id === id);
   const name = emp && emp.name ? emp.name : `ID #${id}`;
 
   if (confirm(`Are you sure you want to delete employee "${name}" (ID #${id})?`)) {
     try {
-      const res = await fetch(`${API_BASE}/api/employees/${id}`, {
+      const res = await apiFetch(`${API_BASE}/api/employees/${id}`, {
         method: 'DELETE'
       });
 
@@ -716,17 +794,23 @@ window.confirmDeleteEmployee = async function(id) {
 // ==========================================
 async function checkAuthSession() {
   try {
-    const res = await fetch(`${API_BASE}/api/auth/me`);
+    const res = await apiFetch(`${API_BASE}/api/auth/me`);
     if (res.ok) {
       const data = await res.json();
       state.currentUser = data.username;
+      state.currentRole = data.role;
     } else {
       state.currentUser = null;
+      state.currentRole = null;
+      state.authToken = null;
+      localStorage.removeItem('auth_token');
     }
   } catch (err) {
     state.currentUser = null;
+    state.currentRole = null;
   }
   renderAuthNav();
+  renderEmployees();
 }
 
 function renderAuthNav() {
@@ -734,11 +818,15 @@ function renderAuthNav() {
 
   if (state.currentUser) {
     const initials = escapeHtml(state.currentUser.substring(0, 2).toUpperCase());
+    const roleLabel = isAdmin() ? 'Admin' : 'User';
+    const roleClass = isAdmin() ? 'admin' : 'user';
+
     authNavContainer.innerHTML = `
       <div style="display: flex; align-items: center; gap: 10px;">
         <div class="user-badge">
           <div class="avatar-sm">${initials}</div>
           <span>${escapeHtml(state.currentUser)}</span>
+          <span class="role-badge ${roleClass}">${roleLabel}</span>
         </div>
         <button class="btn btn-secondary btn-sm" onclick="handleLogout()" title="Sign Out">
           <i class="fa-solid fa-arrow-right-from-bracket"></i>
@@ -751,6 +839,12 @@ function renderAuthNav() {
         <i class="fa-solid fa-right-to-bracket"></i> Sign In
       </button>
     `;
+  }
+
+  // Admin visibility control for Add Employee button
+  const openAddBtn = document.getElementById('openAddModalBtn');
+  if (openAddBtn) {
+    openAddBtn.style.display = isAdmin() ? 'inline-flex' : 'none';
   }
 }
 
@@ -774,9 +868,15 @@ async function handleSignIn(e) {
     if (res.ok) {
       const data = await res.json();
       state.currentUser = data.username;
+      state.currentRole = data.role;
+      state.authToken = data.token;
+      if (data.token) {
+        localStorage.setItem('auth_token', data.token);
+      }
       renderAuthNav();
+      renderEmployees();
       closeAllModals();
-      showToast(`Welcome back, ${data.username}!`, 'success');
+      showToast(`Welcome back, ${data.username}! Signed in as ${isAdmin() ? 'Admin' : 'User'}.`, 'success');
     } else {
       const err = await res.json().catch(() => ({}));
       showToast(err.message || 'Invalid username or password', 'error');
@@ -806,18 +906,17 @@ async function handleSignUp(e) {
     });
 
     if (res.ok) {
-      showToast('Account created successfully! Signing in...', 'success');
-      // Auto sign in
-      const signinRes = await fetch(`${API_BASE}/api/auth/signin`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
-      });
-      if (signinRes.ok) {
-        state.currentUser = username;
-        renderAuthNav();
+      const data = await res.json();
+      state.currentUser = data.username;
+      state.currentRole = data.role;
+      state.authToken = data.token;
+      if (data.token) {
+        localStorage.setItem('auth_token', data.token);
       }
+      renderAuthNav();
+      renderEmployees();
       closeAllModals();
+      showToast('Account created successfully! Signed in.', 'success');
     } else {
       const err = await res.json().catch(() => ({}));
       showToast(err.message || 'Username already taken', 'error');
@@ -830,12 +929,17 @@ async function handleSignUp(e) {
 
 window.handleLogout = async function() {
   try {
-    await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST' });
-    state.currentUser = null;
-    renderAuthNav();
-    showToast('You have been logged out', 'info');
+    await apiFetch(`${API_BASE}/api/auth/logout`, { method: 'POST' });
   } catch (err) {
     console.error('Logout error:', err);
+  } finally {
+    state.currentUser = null;
+    state.currentRole = null;
+    state.authToken = null;
+    localStorage.removeItem('auth_token');
+    renderAuthNav();
+    renderEmployees();
+    showToast('You have been logged out', 'info');
   }
 };
 
